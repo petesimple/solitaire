@@ -1078,6 +1078,64 @@
   ensureTableauCols();
   dealNewGame();
 
+const logoBtn = document.getElementById('logoBtn');
+const shareOverlay = document.getElementById('shareOverlay');
+const closeShareBtn = document.getElementById('closeShareBtn');
+const copyLinkBtn = document.getElementById('copyLinkBtn');
+const nativeShareBtn = document.getElementById('nativeShareBtn');
+
+const SHARE_URL = 'https://petesimple.github.io/solitaire/';
+
+function openShare(){
+  shareOverlay.classList.remove('hidden');
+}
+
+function closeShare(){
+  shareOverlay.classList.add('hidden');
+}
+
+if(logoBtn){
+  logoBtn.addEventListener('click', openShare);
+}
+
+if(closeShareBtn){
+  closeShareBtn.addEventListener('click', closeShare);
+}
+
+if(shareOverlay){
+  shareOverlay.addEventListener('click', e=>{
+    if(e.target === shareOverlay) closeShare();
+  });
+}
+
+if(copyLinkBtn){
+  copyLinkBtn.addEventListener('click', async ()=>{
+    try{
+      await navigator.clipboard.writeText(SHARE_URL);
+      copyLinkBtn.textContent = 'Copied!';
+      setTimeout(()=> copyLinkBtn.textContent = 'Copy Link', 1200);
+    }catch(e){}
+  });
+}
+
+if(nativeShareBtn){
+  if(navigator.share){
+    nativeShareBtn.addEventListener('click', ()=>{
+      navigator.share({
+        title:'Air Hockey Solitaire',
+        text:'Play Air Hockey Solitaire',
+        url: SHARE_URL
+      });
+    });
+  } else {
+    nativeShareBtn.style.display = 'none';
+  }
+}
+
+window.addEventListener('keydown', e=>{
+  if(e.key === 'Escape') closeShare();
+});
+  
 })();
 function ensureAudio(){
   if(!audioCtx){
