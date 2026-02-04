@@ -93,11 +93,15 @@
   }
 
   function openSettings(){
-    if(settingsOverlay) settingsOverlay.classList.remove('hidden');
-  }
+  if(!settingsOverlay) return;
+  settingsOverlay.classList.remove('hidden');
+  settingsOverlay.style.display = 'grid';
+}
   function closeSettings(){
-    if(settingsOverlay) settingsOverlay.classList.add('hidden');
-  }
+  if(!settingsOverlay) return;
+  settingsOverlay.classList.add('hidden');
+  settingsOverlay.style.display = 'none';
+}
 
   // Moves + undo
   let moveCount = 0;
