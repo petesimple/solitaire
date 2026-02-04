@@ -4,6 +4,8 @@
 
   window.AH_SOLITAIRE_BACKS = window.AH_SOLITAIRE_BACKS || ['brunswick.png'];
 
+  window.AH_SOLITAIRE_BACKS = window.AH_SOLITAIRE_BACKS || ['back-v1.png'];
+
   // ---------- Config ----------
   const SUITS = ['S','H','D','C'];
   const RANKS = [1,2,3,4,5,6,7,8,9,10,11,12,13]; // 1=A
@@ -12,7 +14,7 @@
 
   const ASSET = {
     frontsDir: './cards/fronts/',
-    back: './cards/backs/brunswick.png'
+    back: 'brunswick.png'
   };
 
   // ---------- DOM ----------
@@ -60,7 +62,7 @@
   // Settings
   const SETTINGS_KEY = 'ah-solitaire-settings-v1';
   let settings = {
-    back: 'brunswick.png',
+    back: 'back-v1.png',
     soundMaster: true,
     soundShuffle: true,
     soundPlace: true,
@@ -73,7 +75,13 @@
   function loadSettings(){
     try{
       const raw = localStorage.getItem(SETTINGS_KEY);
-      if(raw) settings = Object.assign(settings, JSON.parse(raw));
+      if(raw){
+        settings = Object.assign(settings, JSON.parse(raw));
+      } else {
+        // First run default
+        settings.back = 'brunswick.png';
+        saveSettings();
+      }
     }catch(e){}
     applyBack();
   }
@@ -81,21 +89,16 @@
     try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }catch(e){}
   }
   function applyBack(){
-    ASSET.back = './cards/backs/' + (settings.back || 'brunswick.png');
+    ASSET.back = './cards/backs/' + (settings.back || 'back-v1.png');
   }
 
-function openSettings(){
-  if(!settingsOverlay) return;
-  settingsOverlay.classList.remove('hidden');
-  settingsOverlay.style.display = 'grid';
-}
+  function openSettings(){
+    if(settingsOverlay) settingsOverlay.classList.remove('hidden');
+  }
+  function closeSettings(){
+    if(settingsOverlay) settingsOverlay.classList.add('hidden');
+  }
 
-function closeSettings(){
-  if(!settingsOverlay) return;
-  settingsOverlay.classList.add('hidden');
-  settingsOverlay.style.display = 'none';
-}
-  
   // Moves + undo
   let moveCount = 0;
   const undoStack = [];
@@ -886,6 +889,23 @@ function closeSettings(){
   }
 
   btnNew.addEventListener('click', dealNewGame);
+
+  // Settings open/close
+  if(btnSettings){
+    btnSettings.addEventListener('click', () => openSettings());
+  }
+  if(closeSettingsBtn){
+    closeSettingsBtn.addEventListener('click', () => closeSettings());
+  }
+  if(settingsOverlay){
+    settingsOverlay.addEventListener('click', (e) => {
+      if(e.target === settingsOverlay) closeSettings();
+    });
+  }
+  window.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape') closeSettings();
+  });
+
   playAgainBtn.addEventListener('click', dealNewGame);
 
   if(btnUndo){
@@ -1027,7 +1047,7 @@ function closeSettings(){
 
   
   function populateBacks(){
-    const list = window.AH_SOLITAIRE_BACKS || ['brunswick.png'];
+    const list = window.AH_SOLITAIRE_BACKS || ['back-v1.png'];
     backSelect.innerHTML = '';
     list.forEach(fn=>{
       const o = document.createElement('option');
@@ -1035,7 +1055,7 @@ function closeSettings(){
       o.textContent = fn.replace(/[-_]/g,' ').replace(/\.png$/,'');
       backSelect.appendChild(o);
     });
-    backSelect.value = settings.back || 'brunswick.png';
+    backSelect.value = settings.back || 'back-v1.png';
   }
 
   // ---------- Init ----------
