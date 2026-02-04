@@ -1035,7 +1035,7 @@ function closeSettings(){
       o.textContent = fn.replace(/[-_]/g,' ').replace(/\.png$/,'');
       backSelect.appendChild(o);
     });
-    backSelect.value = settings.back || 'back-v1.png';
+    backSelect.value = settings.back || 'brunswick.png';
   }
 
   // ---------- Init ----------
