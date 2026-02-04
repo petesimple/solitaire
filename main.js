@@ -1027,7 +1027,7 @@ function closeSettings(){
 
   
   function populateBacks(){
-    const list = window.AH_SOLITAIRE_BACKS || ['back-v1.png'];
+    const list = window.AH_SOLITAIRE_BACKS || ['brunswick.png'];
     backSelect.innerHTML = '';
     list.forEach(fn=>{
       const o = document.createElement('option');
