@@ -19,6 +19,17 @@
   const elTableau = document.getElementById('tableau');
   const elTimer = document.getElementById('timer');
   const btnNew = document.getElementById('newGameBtn');
+  const btnSettings = document.getElementById('settingsBtn');
+  const settingsOverlay = document.getElementById('settings');
+  const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+  const backSelect = document.getElementById('backSelect');
+  const chkMaster = document.getElementById('soundMaster');
+  const chkShuffle = document.getElementById('soundShuffle');
+  const chkPlace = document.getElementById('soundPlace');
+  const chkWin = document.getElementById('soundWin');
+  const btnUndo = document.getElementById('undoBtn');
+  const btnAuto = document.getElementById('autoBtn');
+  const elMoves = document.getElementById('moves');
   const winOverlay = document.getElementById('winOverlay');
   const playAgainBtn = document.getElementById('playAgainBtn');
   const confettiCanvas = document.getElementById('confettiCanvas');
@@ -42,6 +53,39 @@
   let startTs = null;
   let timerRAF = null;
   let hasStarted = false;
+
+
+  // Settings
+  const SETTINGS_KEY = 'ah-solitaire-settings-v1';
+  let settings = {
+    back: 'back-v1.png',
+    soundMaster: true,
+    soundShuffle: true,
+    soundPlace: true,
+    soundWin: true
+  };
+
+  let audioCtx = null;
+
+
+  function loadSettings(){
+    try{
+      const raw = localStorage.getItem(SETTINGS_KEY);
+      if(raw) settings = Object.assign(settings, JSON.parse(raw));
+    }catch(e){}
+    applyBack();
+  }
+  function saveSettings(){
+    try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }catch(e){}
+  }
+  function applyBack(){
+    ASSET.back = './cards/backs/' + (settings.back || 'back-v1.png');
+  }
+
+  // Moves + undo
+  let moveCount = 0;
+  const undoStack = [];
+  const UNDO_LIMIT = 200;
 
   // Drag
   let drag = null; // {cardIds, from:{type, idx, suit?}, originRect, pointerId, dx, dy, stackEl}
@@ -75,6 +119,150 @@
     if(timerRAF) cancelAnimationFrame(timerRAF);
     timerRAF = null;
     elTimer.textContent = '00:00';
+  }
+
+  function setMoves(n){
+    moveCount = n;
+    if(elMoves) elMoves.textContent = `Moves: ${moveCount}`;
+  }
+  function bumpMove(){
+    setMoves(moveCount + 1);
+  }
+
+  function snapshotState(){
+    const faceUp = {};
+    for(const c of cards) faceUp[c.id] = !!c.faceUp;
+    const elapsed = (hasStarted && startTs) ? (performance.now() - startTs) : 0;
+
+    return {
+      stock: stock.slice(),
+      waste: waste.slice(),
+      foundations: {S: foundations.S.slice(), H: foundations.H.slice(), D: foundations.D.slice(), C: foundations.C.slice()},
+      tableau: tableau.map(col => col.slice()),
+      faceUp,
+      moveCount,
+      hasStarted,
+      elapsed
+    };
+  }
+
+  function pushUndo(){
+    undoStack.push(snapshotState());
+    if(undoStack.length > UNDO_LIMIT) undoStack.shift();
+    if(btnUndo) btnUndo.disabled = undoStack.length === 0;
+  }
+
+  function restoreState(s){
+    stock = s.stock.slice();
+    waste = s.waste.slice();
+    foundations = {S: s.foundations.S.slice(), H: s.foundations.H.slice(), D: s.foundations.D.slice(), C: s.foundations.C.slice()};
+    tableau = s.tableau.map(col => col.slice());
+    for(const c of cards) c.faceUp = !!s.faceUp[c.id];
+
+    setMoves(s.moveCount || 0);
+
+    // restore timer
+    if(timerRAF) cancelAnimationFrame(timerRAF);
+    timerRAF = null;
+
+    hasStarted = !!s.hasStarted;
+    if(hasStarted){
+      startTs = performance.now() - (s.elapsed || 0);
+      const tick = () => {
+        if(!hasStarted) return;
+        elTimer.textContent = fmtTime(performance.now() - startTs);
+        timerRAF = requestAnimationFrame(tick);
+      };
+      timerRAF = requestAnimationFrame(tick);
+    } else {
+      startTs = null;
+      elTimer.textContent = '00:00';
+    }
+
+    playSound('shuffle');
+    renderAll();
+  }
+
+  function undo(){
+    const s = undoStack.pop();
+    if(!s) return;
+    restoreState(s);
+    if(btnUndo) btnUndo.disabled = undoStack.length === 0;
+  }
+
+  function topRank(suit){
+    const p = foundations[suit];
+    if(!p.length) return 0;
+    return getCard(top(p)).rank;
+  }
+
+  function safeToFoundation(card){
+    // Conservative "won't trap you" rule:
+    // You can safely move a red card if it is <= min(black foundations)+1
+    // You can safely move a black card if it is <= min(red foundations)+1
+    // This prevents auto-moving low cards too aggressively.
+    const minBlack = Math.min(topRank('S'), topRank('C'));
+    const minRed = Math.min(topRank('H'), topRank('D'));
+
+    if(card.color === 'R') return card.rank <= (minBlack + 1);
+    return card.rank <= (minRed + 1);
+  }
+
+  function autoFinish(){
+    startTimerIfNeeded();
+
+    let movedAny = false;
+    pushUndo(); // one snapshot for the whole auto sequence
+
+    // Keep making safe moves until no more exist.
+    for(let guard=0; guard<600; guard++){
+      let movedThisPass = false;
+
+      // Waste top first
+      const w = top(waste);
+      if(w){
+        const c = getCard(w);
+        if(canMoveToFoundation(c, c.suit) && safeToFoundation(c)){
+          waste.pop();
+          foundations[c.suit].push(w);
+          bumpMove();
+      playSound('place');
+          movedAny = true;
+          movedThisPass = true;
+          continue;
+        }
+      }
+
+      // Tableau tops
+      for(let col=0; col<7; col++){
+        const id = top(tableau[col]);
+        if(!id) continue;
+        const c = getCard(id);
+        if(!c.faceUp) continue;
+
+        if(canMoveToFoundation(c, c.suit) && safeToFoundation(c)){
+          tableau[col].pop();
+          foundations[c.suit].push(id);
+          flipTableauIfNeeded(col);
+          bumpMove();
+          movedAny = true;
+          movedThisPass = true;
+          break;
+        }
+      }
+
+      if(!movedThisPass) break;
+    }
+
+    if(!movedAny){
+      // No-op: remove undo snapshot
+      undoStack.pop();
+      if(btnUndo) btnUndo.disabled = undoStack.length === 0;
+      return;
+    }
+
+    renderAll();
+    checkWin();
   }
 
   function cardId(suit, rank){
@@ -112,6 +300,9 @@
   function dealNewGame(){
     resetTimer();
     hideWin();
+    undoStack.length = 0;
+    if(btnUndo) btnUndo.disabled = true;
+    setMoves(0);
 
     buildDeck();
     const deckIds = shuffle(cards.map(c=>c.id));
@@ -294,6 +485,8 @@
     // Stock click to draw
     elStock.onclick = () => {
       startTimerIfNeeded();
+      pushUndo();
+      bumpMove();
       if(stock.length){
         const id = stock.pop();
         getCard(id).faceUp = true;
@@ -340,6 +533,8 @@
       const pile = tableau[loc.col];
       if(top(pile) === id && !c.faceUp){
         startTimerIfNeeded();
+        pushUndo();
+        bumpMove();
         c.faceUp = true;
         renderAll();
         return;
@@ -350,8 +545,8 @@
 
     startTimerIfNeeded();
     // Auto move: foundation first, else tableau
-    if(tryAutoMoveToFoundation(id)) { renderAll(); checkWin(); return; }
-    if(tryAutoMoveToTableau(id)) { renderAll(); checkWin(); return; }
+    if(tryAutoMoveToFoundation(id)) { pushUndo(); bumpMove(); renderAll(); checkWin(); return; }
+    if(tryAutoMoveToTableau(id)) { pushUndo(); bumpMove(); renderAll(); checkWin(); return; }
   }
 
   function locateCard(id){
@@ -451,6 +646,7 @@
 
     // Start drag
     startTimerIfNeeded();
+    pushUndo();
 
     dragLayer = dragLayer || createDragLayer();
     const stackEl = document.createElement('div');
@@ -542,6 +738,12 @@
 
     const drop = findDropTarget(e.clientX, e.clientY);
     const moved = attemptDrop(drop);
+    if(!moved){
+      undoStack.pop();
+      if(btnUndo) btnUndo.disabled = undoStack.length === 0;
+    } else {
+      bumpMove();
+    }
 
     // Cleanup drag visuals
     if(dragLayer && drag.stackEl){
@@ -650,7 +852,8 @@
   function checkWin(){
     const won = SUITS.every(s => foundations[s].length === 13);
     if(won){
-      showWin();
+      playSound('win');
+    showWin();
     }
   }
 
@@ -670,6 +873,30 @@
 
   btnNew.addEventListener('click', dealNewGame);
   playAgainBtn.addEventListener('click', dealNewGame);
+
+  if(btnUndo){
+    btnUndo.addEventListener('click', () => undo());
+    btnUndo.disabled = true;
+  }
+
+  if(btnAuto){
+    btnAuto.addEventListener('click', () => autoFinish());
+  }
+
+  if(btnSettings){
+    btnSettings.addEventListener('click', ()=> settingsOverlay.classList.remove('hidden'));
+  }
+  if(closeSettingsBtn){
+    closeSettingsBtn.addEventListener('click', ()=> settingsOverlay.classList.add('hidden'));
+  }
+  if(backSelect){
+    backSelect.addEventListener('change', ()=>{
+      settings.back = backSelect.value;
+      saveSettings();
+      applyBack();
+      renderAll();
+    });
+  }
 
   // ---------- Fireworks of cards ----------
   let fx = null;
@@ -784,8 +1011,69 @@
     ctx.clearRect(0,0,confettiCanvas.width, confettiCanvas.height);
   }
 
+  
+  function populateBacks(){
+    const list = window.AH_SOLITAIRE_BACKS || ['back-v1.png'];
+    backSelect.innerHTML = '';
+    list.forEach(fn=>{
+      const o = document.createElement('option');
+      o.value = fn;
+      o.textContent = fn.replace(/[-_]/g,' ').replace(/\.png$/,'');
+      backSelect.appendChild(o);
+    });
+    backSelect.value = settings.back || 'back-v1.png';
+  }
+
   // ---------- Init ----------
+
+  loadSettings();
+  
+  populateBacks();
+  chkMaster.checked = settings.soundMaster;
+  chkShuffle.checked = settings.soundShuffle;
+  chkPlace.checked = settings.soundPlace;
+  chkWin.checked = settings.soundWin;
+
+  chkMaster.onchange = ()=>{ settings.soundMaster = chkMaster.checked; saveSettings(); };
+  chkShuffle.onchange = ()=>{ settings.soundShuffle = chkShuffle.checked; saveSettings(); };
+  chkPlace.onchange = ()=>{ settings.soundPlace = chkPlace.checked; saveSettings(); };
+  chkWin.onchange = ()=>{ settings.soundWin = chkWin.checked; saveSettings(); };
+
   ensureTableauCols();
   dealNewGame();
 
 })();
+function ensureAudio(){
+  if(!audioCtx){
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+}
+
+function playSound(type){
+  if(!settings.soundMaster) return;
+  if(type==='shuffle' && !settings.soundShuffle) return;
+  if(type==='place' && !settings.soundPlace) return;
+  if(type==='win' && !settings.soundWin) return;
+
+  ensureAudio();
+  const t = audioCtx.currentTime;
+
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+
+  osc.type = 'sine';
+  let freq = 440, dur = 0.06;
+
+  if(type==='shuffle'){ freq = 260; dur = 0.05; }
+  if(type==='place'){ freq = 520; dur = 0.04; }
+  if(type==='win'){ freq = 660; dur = 0.12; }
+
+  osc.frequency.setValueAtTime(freq, t);
+  gain.gain.setValueAtTime(0.0001, t);
+  gain.gain.exponentialRampToValueAtTime(0.2, t + 0.01);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start(t);
+  osc.stop(t + dur);
+}
