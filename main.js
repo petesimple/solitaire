@@ -316,6 +316,46 @@
 
   function top(arr){ return arr.length ? arr[arr.length-1] : null; }
 
+function bindAutoGesture(){
+  const elTable = document.getElementById('table');
+  if(!elTable) return;
+
+  // Desktop: dblclick anywhere on the play area
+  elTable.addEventListener('dblclick', (e) => {
+    if (e.target.closest('button, a, input, select, textarea, .settings-card, .win-card, .share-card')) return;
+    autoFinish();
+  });
+
+  // Mobile: double-tap detector
+  let lastTapTime = 0;
+  let lastTapX = 0;
+  let lastTapY = 0;
+
+  elTable.addEventListener('pointerup', (e) => {
+    if (e.pointerType === 'mouse') return;
+    if (drag && drag.moved) return;
+
+    if (e.target.closest('button, a, input, select, textarea, .settings-card, .win-card, .share-card')) return;
+
+    const now = performance.now();
+    const dt = now - lastTapTime;
+
+    const dx = e.clientX - lastTapX;
+    const dy = e.clientY - lastTapY;
+    const dist = Math.hypot(dx, dy);
+
+    if (dt > 0 && dt < 300 && dist < 35) {
+      autoFinish();
+      lastTapTime = 0; // reset
+      return;
+    }
+
+    lastTapTime = now;
+    lastTapX = e.clientX;
+    lastTapY = e.clientY;
+  });
+}
+  
   function dealNewGame(){
     resetTimer();
     hideWin();
@@ -1060,10 +1100,9 @@
     backSelect.value = settings.back || 'brunswick.png';
   }
 
-  // ---------- Init ----------
-
+    // ---------- Init ----------
   loadSettings();
-  
+
   populateBacks();
   chkMaster.checked = settings.soundMaster;
   chkShuffle.checked = settings.soundShuffle;
@@ -1076,98 +1115,99 @@
   chkWin.onchange = ()=>{ settings.soundWin = chkWin.checked; saveSettings(); };
 
   ensureTableauCols();
+  bindAutoGesture();
   dealNewGame();
 
-const logoBtn = document.getElementById('logoBtn');
-const shareOverlay = document.getElementById('shareOverlay');
-const closeShareBtn = document.getElementById('closeShareBtn');
-const copyLinkBtn = document.getElementById('copyLinkBtn');
-const nativeShareBtn = document.getElementById('nativeShareBtn');
+  // ---------- Share overlay ----------
+  const logoBtn = document.getElementById('logoBtn');
+  const shareOverlay = document.getElementById('shareOverlay');
+  const closeShareBtn = document.getElementById('closeShareBtn');
+  const copyLinkBtn = document.getElementById('copyLinkBtn');
+  const nativeShareBtn = document.getElementById('nativeShareBtn');
 
-const SHARE_URL = 'https://petesimple.github.io/solitaire/';
+  const SHARE_URL = 'https://petesimple.github.io/solitaire/';
 
-function openShare(){
-  shareOverlay.classList.remove('hidden');
-}
+  function openShare(){
+    if(!shareOverlay) return;
+    shareOverlay.classList.remove('hidden');
+  }
 
-function closeShare(){
-  shareOverlay.classList.add('hidden');
-}
+  function closeShare(){
+    if(!shareOverlay) return;
+    shareOverlay.classList.add('hidden');
+  }
 
-if(logoBtn){
-  logoBtn.addEventListener('click', openShare);
-}
+  if(logoBtn) logoBtn.addEventListener('click', openShare);
+  if(closeShareBtn) closeShareBtn.addEventListener('click', closeShare);
 
-if(closeShareBtn){
-  closeShareBtn.addEventListener('click', closeShare);
-}
-
-if(shareOverlay){
-  shareOverlay.addEventListener('click', e=>{
-    if(e.target === shareOverlay) closeShare();
-  });
-}
-
-if(copyLinkBtn){
-  copyLinkBtn.addEventListener('click', async ()=>{
-    try{
-      await navigator.clipboard.writeText(SHARE_URL);
-      copyLinkBtn.textContent = 'Copied!';
-      setTimeout(()=> copyLinkBtn.textContent = 'Copy Link', 1200);
-    }catch(e){}
-  });
-}
-
-if(nativeShareBtn){
-  if(navigator.share){
-    nativeShareBtn.addEventListener('click', ()=>{
-      navigator.share({
-        title:'Air Hockey Solitaire',
-        text:'Play Air Hockey Solitaire',
-        url: SHARE_URL
-      });
+  if(shareOverlay){
+    shareOverlay.addEventListener('click', e=>{
+      if(e.target === shareOverlay) closeShare();
     });
-  } else {
-    nativeShareBtn.style.display = 'none';
   }
-}
 
-window.addEventListener('keydown', e=>{
-  if(e.key === 'Escape') closeShare();
-});
-  
+  if(copyLinkBtn){
+    copyLinkBtn.addEventListener('click', async ()=>{
+      try{
+        await navigator.clipboard.writeText(SHARE_URL);
+        copyLinkBtn.textContent = 'Copied!';
+        setTimeout(()=> copyLinkBtn.textContent = 'Copy Link', 1200);
+      }catch(e){}
+    });
+  }
+
+  if(nativeShareBtn){
+    if(navigator.share){
+      nativeShareBtn.addEventListener('click', ()=>{
+        navigator.share({
+          title:'Air Hockey Solitaire',
+          text:'Play Air Hockey Solitaire',
+          url: SHARE_URL
+        });
+      });
+    } else {
+      nativeShareBtn.style.display = 'none';
+    }
+  }
+
+  window.addEventListener('keydown', e=>{
+    if(e.key === 'Escape') closeShare();
+  });
+
+  // ---------- Audio ----------
+  function ensureAudio(){
+    if(!audioCtx){
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  }
+
+  function playSound(type){
+    if(!settings.soundMaster) return;
+    if(type==='shuffle' && !settings.soundShuffle) return;
+    if(type==='place' && !settings.soundPlace) return;
+    if(type==='win' && !settings.soundWin) return;
+
+    ensureAudio();
+    const t = audioCtx.currentTime;
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = 'sine';
+    let freq = 440, dur = 0.06;
+
+    if(type==='shuffle'){ freq = 260; dur = 0.05; }
+    if(type==='place'){ freq = 520; dur = 0.04; }
+    if(type==='win'){ freq = 660; dur = 0.12; }
+
+    osc.frequency.setValueAtTime(freq, t);
+    gain.gain.setValueAtTime(0.0001, t);
+    gain.gain.exponentialRampToValueAtTime(0.2, t + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+
+    osc.connect(gain).connect(audioCtx.destination);
+    osc.start(t);
+    osc.stop(t + dur);
+  }
+
 })();
-function ensureAudio(){
-  if(!audioCtx){
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-}
-
-function playSound(type){
-  if(!settings.soundMaster) return;
-  if(type==='shuffle' && !settings.soundShuffle) return;
-  if(type==='place' && !settings.soundPlace) return;
-  if(type==='win' && !settings.soundWin) return;
-
-  ensureAudio();
-  const t = audioCtx.currentTime;
-
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-
-  osc.type = 'sine';
-  let freq = 440, dur = 0.06;
-
-  if(type==='shuffle'){ freq = 260; dur = 0.05; }
-  if(type==='place'){ freq = 520; dur = 0.04; }
-  if(type==='win'){ freq = 660; dur = 0.12; }
-
-  osc.frequency.setValueAtTime(freq, t);
-  gain.gain.setValueAtTime(0.0001, t);
-  gain.gain.exponentialRampToValueAtTime(0.2, t + 0.01);
-  gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-
-  osc.connect(gain).connect(audioCtx.destination);
-  osc.start(t);
-  osc.stop(t + dur);
-}
