@@ -81,9 +81,21 @@
     try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }catch(e){}
   }
   function applyBack(){
-    ASSET.back = './cards/backs/' + (settings.back || 'back-v1.png');
+    ASSET.back = './cards/backs/' + (settings.back || 'brunswick.png');
   }
 
+function openSettings(){
+  if(!settingsOverlay) return;
+  settingsOverlay.classList.remove('hidden');
+  settingsOverlay.style.display = 'grid';
+}
+
+function closeSettings(){
+  if(!settingsOverlay) return;
+  settingsOverlay.classList.add('hidden');
+  settingsOverlay.style.display = 'none';
+}
+  
   // Moves + undo
   let moveCount = 0;
   const undoStack = [];
