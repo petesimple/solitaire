@@ -263,11 +263,9 @@
         const cardEl = makeCardEl(id);
         // stack offset
         const y = idx * getStackOffset(c.faceUp);
-        cardEl.style.left = '0px';
+        cardEl.style.left = '50%';
         cardEl.style.top = `${y}px`;
-        cardEl.style.width = '100%';
-        // Keep consistent height
-        cardEl.style.height = 'var(--cardH)';
+        cardEl.style.transform = 'translateX(-50%)';
         p.appendChild(cardEl);
       });
     });
