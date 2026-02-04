@@ -2,6 +2,8 @@
 (() => {
   'use strict';
 
+  window.AH_SOLITAIRE_BACKS = window.AH_SOLITAIRE_BACKS || ['brunswick.png'];
+
   window.AH_SOLITAIRE_BACKS = window.AH_SOLITAIRE_BACKS || ['back-v1.png'];
 
   // ---------- Config ----------
@@ -12,7 +14,7 @@
 
   const ASSET = {
     frontsDir: './cards/fronts/',
-    back: './cards/backs/back-v1.png'
+    back: 'brunswick.png'
   };
 
   // ---------- DOM ----------
@@ -73,7 +75,13 @@
   function loadSettings(){
     try{
       const raw = localStorage.getItem(SETTINGS_KEY);
-      if(raw) settings = Object.assign(settings, JSON.parse(raw));
+      if(raw){
+        settings = Object.assign(settings, JSON.parse(raw));
+      } else {
+        // First run default
+        settings.back = 'brunswick.png';
+        saveSettings();
+      }
     }catch(e){}
     applyBack();
   }
