@@ -109,18 +109,8 @@
       </div>
     </div>
   </div>
-  <div class="overlay hidden" id="shareOverlay"></div>
 
-  <script src="./cards/backs/backs.js"></script>
-  <script src="./main.js"></script>
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./service-worker.js').catch(console.warn);
-      });
-    }
-  </script>
-  <!-- Share overlay -->
+<!-- Share overlay -->
 <div class="overlay hidden" id="shareOverlay" role="dialog" aria-modal="true">
   <div class="share-card">
     <div class="share-title">Share Air Hockey Solitaire</div>
@@ -142,5 +132,16 @@
     </div>
   </div>
 </div>
+  
+  <script src="./cards/backs/backs.js"></script>
+  <script src="./main.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./service-worker.js').catch(console.warn);
+      });
+    }
+  </script>
+  
 </body>
 </html>
