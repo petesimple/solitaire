@@ -413,3 +413,8 @@ body{
   height: 100%;
   object-fit: contain;
 }
+
+#tableau{
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
