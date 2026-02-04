@@ -2,8 +2,6 @@
 (() => {
   'use strict';
 
-  window.AH_SOLITAIRE_BACKS = window.AH_SOLITAIRE_BACKS || ['brunswick.png'];
-
   window.AH_SOLITAIRE_BACKS = window.AH_SOLITAIRE_BACKS || ['back-v1.png'];
 
   // ---------- Config ----------
@@ -14,7 +12,7 @@
 
   const ASSET = {
     frontsDir: './cards/fronts/',
-    back: 'brunswick.png'
+    back: './cards/backs/back-v1.png'
   };
 
   // ---------- DOM ----------
@@ -75,13 +73,7 @@
   function loadSettings(){
     try{
       const raw = localStorage.getItem(SETTINGS_KEY);
-      if(raw){
-        settings = Object.assign(settings, JSON.parse(raw));
-      } else {
-        // First run default
-        settings.back = 'brunswick.png';
-        saveSettings();
-      }
+      if(raw) settings = Object.assign(settings, JSON.parse(raw));
     }catch(e){}
     applyBack();
   }
@@ -91,17 +83,6 @@
   function applyBack(){
     ASSET.back = './cards/backs/' + (settings.back || 'back-v1.png');
   }
-
-  function openSettings(){
-  if(!settingsOverlay) return;
-  settingsOverlay.classList.remove('hidden');
-  settingsOverlay.style.display = 'grid';
-}
-  function closeSettings(){
-  if(!settingsOverlay) return;
-  settingsOverlay.classList.add('hidden');
-  settingsOverlay.style.display = 'none';
-}
 
   // Moves + undo
   let moveCount = 0;
@@ -893,23 +874,6 @@
   }
 
   btnNew.addEventListener('click', dealNewGame);
-
-  // Settings open/close
-  if(btnSettings){
-    btnSettings.addEventListener('click', () => openSettings());
-  }
-  if(closeSettingsBtn){
-    closeSettingsBtn.addEventListener('click', () => closeSettings());
-  }
-  if(settingsOverlay){
-    settingsOverlay.addEventListener('click', (e) => {
-      if(e.target === settingsOverlay) closeSettings();
-    });
-  }
-  window.addEventListener('keydown', (e) => {
-    if(e.key === 'Escape') closeSettings();
-  });
-
   playAgainBtn.addEventListener('click', dealNewGame);
 
   if(btnUndo){
