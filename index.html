@@ -15,25 +15,24 @@
 </head>
 <body>
   <header class="topbar">
-    <div class="brand">
-  <button class="logo-btn" id="logoBtn" aria-label="Share Air Hockey Solitaire">
-    <img src="./icon-192.png" alt="Air Hockey Solitaire logo" />
-  </button>
-  <div class="brand-text">
-    <div class="title">Air Hockey Solitaire</div>
-    <div class="subtitle">Klondike - 1 draw - timed</div>
-  </div>
-</div>
-
-    <div class="hud">
-      <div class="moves" id="moves">Moves: 0</div>
-      <div class="timer" id="timer">00:00</div>
-      <button class="btn" id="undoBtn" title="Undo last move">Undo</button>
-      <button class="btn" id="autoBtn" title="Auto-finish to foundations when safe">Auto</button>
-      <button class="btn" id="newGameBtn" title="New game">New Game</button>
-      <button class="btn" id="settingsBtn" title="Settings">⚙︎</button>
+  <div class="titleRow">
+    <img class="appLogo" src="logo.png" alt="Air Hockey Solitaire" />
+    <div class="titleText">
+      <div class="appTitle">Air Hockey Solitaire</div>
+      <div class="appSub">Klondike - 1 draw - timed</div>
     </div>
-  </header>
+  </div>
+
+  <div class="toolsRow" id="toolsRow">
+    <div class="pill">Moves: <span id="moves">0</span></div>
+    <div class="pill"><span id="timer">00:00</span></div>
+
+    <button id="undoBtn" class="pill">Undo</button>
+    <button id="autoBtn" class="pill">Auto</button>
+    <button id="newGameBtn" class="pill">New Game</button>
+    <button id="settingsBtn" class="pill" aria-label="Settings">⚙</button>
+  </div>
+</header>
 
   <main class="table" id="table">
     <section class="row top">
