@@ -242,3 +242,5 @@ body{
   :root{ --cardW: 64px; --cardH: 92px; --stackOffset: 16px; --gap: 10px; }
   .brand .subtitle{ display:none; }
 }
+
+.tableauPile{ position:relative; }
