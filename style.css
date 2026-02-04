@@ -198,10 +198,7 @@ body{
   background: rgba(0,0,0,.48);
   z-index: 10000;
 }
-/* Make sure the settings modal truly disappears */
-.settings.hidden{
-  display: none !important;
-}
+.hidden{ display:none; }
 
 #confettiCanvas{
   position:absolute;
