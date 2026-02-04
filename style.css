@@ -374,3 +374,42 @@ body{
 .check input{
   transform: scale(1.15);
 }
+
+:root{
+  /* Base card size (desktop/tablet) */
+  --cardW: 92px;
+  --cardH: 128px;
+
+  /* How far tableau cards “fan” down */
+  --stackOffset: 22px;
+}
+
+/* Mobile: bigger cards + a little more spacing */
+@media (max-width: 520px){
+  :root{
+    --cardW: 112px;
+    --cardH: 156px;
+    --stackOffset: 26px;
+  }
+}
+
+/* Tiny phones: still readable */
+@media (max-width: 380px){
+  :root{
+    --cardW: 104px;
+    --cardH: 146px;
+    --stackOffset: 24px;
+  }
+}
+
+/* Make sure the card element uses the vars */
+.card{
+  width: var(--cardW);
+  height: var(--cardH);
+}
+
+.card img{
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
