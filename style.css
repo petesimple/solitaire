@@ -36,6 +36,32 @@ body{
   backdrop-filter: blur(8px);
 }
 
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.logo-btn{
+  background:none;
+  border:none;
+  padding:0;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+}
+
+.logo-btn img{
+  width:40px;
+  height:40px;
+  border-radius:8px;
+}
+
+.brand-text{
+  display:flex;
+  flex-direction:column;
+}
+
 .brand .title{
   font-weight: 800;
   letter-spacing: .3px;
@@ -201,6 +227,41 @@ body{
 .hidden {
   display: none !important;
   pointer-events: none !important;
+}
+
+.share-card{
+  background:#0f1620;
+  border-radius:14px;
+  padding:20px;
+  max-width:320px;
+  width:90%;
+  text-align:center;
+  box-shadow:0 20px 60px rgba(0,0,0,.5);
+}
+
+.share-title{
+  font-size:1.1em;
+  margin-bottom:12px;
+}
+
+.share-qr{
+  width:200px;
+  height:200px;
+  margin:12px auto;
+  display:block;
+}
+
+.share-url{
+  font-size:.85em;
+  opacity:.8;
+  margin-bottom:12px;
+  word-break:break-all;
+}
+
+.share-actions{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
 }
 
 #confettiCanvas{
