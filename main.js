@@ -2,6 +2,8 @@
 (() => {
   'use strict';
 
+  window.AH_SOLITAIRE_BACKS = window.AH_SOLITAIRE_BACKS || ['back-v1.png'];
+
   // ---------- Config ----------
   const SUITS = ['S','H','D','C'];
   const RANKS = [1,2,3,4,5,6,7,8,9,10,11,12,13]; // 1=A
@@ -80,6 +82,13 @@
   }
   function applyBack(){
     ASSET.back = './cards/backs/' + (settings.back || 'back-v1.png');
+  }
+
+  function openSettings(){
+    if(settingsOverlay) settingsOverlay.classList.remove('hidden');
+  }
+  function closeSettings(){
+    if(settingsOverlay) settingsOverlay.classList.add('hidden');
   }
 
   // Moves + undo
@@ -872,6 +881,23 @@
   }
 
   btnNew.addEventListener('click', dealNewGame);
+
+  // Settings open/close
+  if(btnSettings){
+    btnSettings.addEventListener('click', () => openSettings());
+  }
+  if(closeSettingsBtn){
+    closeSettingsBtn.addEventListener('click', () => closeSettings());
+  }
+  if(settingsOverlay){
+    settingsOverlay.addEventListener('click', (e) => {
+      if(e.target === settingsOverlay) closeSettings();
+    });
+  }
+  window.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape') closeSettings();
+  });
+
   playAgainBtn.addEventListener('click', dealNewGame);
 
   if(btnUndo){
