@@ -60,7 +60,7 @@
   // Settings
   const SETTINGS_KEY = 'ah-solitaire-settings-v1';
   let settings = {
-    back: 'back-v1.png',
+    back: 'brunswick.png',
     soundMaster: true,
     soundShuffle: true,
     soundPlace: true,
