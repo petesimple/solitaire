@@ -87,7 +87,7 @@
     try{ localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }catch(e){}
   }
   function applyBack(){
-    ASSET.back = './cards/backs/' + (settings.back || 'back-v1.png');
+    ASSET.back = './cards/backs/' + (settings.back || 'brunswick.png');
   }
 
   function openSettings(){
@@ -1049,7 +1049,7 @@
 
   
   function populateBacks(){
-    const list = window.AH_SOLITAIRE_BACKS || ['back-v1.png'];
+    const list = window.AH_SOLITAIRE_BACKS || ['brunswick.png'];
     backSelect.innerHTML = '';
     list.forEach(fn=>{
       const o = document.createElement('option');
@@ -1057,7 +1057,7 @@
       o.textContent = fn.replace(/[-_]/g,' ').replace(/\.png$/,'');
       backSelect.appendChild(o);
     });
-    backSelect.value = settings.back || 'back-v1.png';
+    backSelect.value = settings.back || 'brunswick.png';
   }
 
   // ---------- Init ----------
