@@ -15,8 +15,12 @@
     </div>
 
     <div class="hud">
+      <div class="moves" id="moves">Moves: 0</div>
       <div class="timer" id="timer">00:00</div>
+      <button class="btn" id="undoBtn" title="Undo last move">Undo</button>
+      <button class="btn" id="autoBtn" title="Auto-finish to foundations when safe">Auto</button>
       <button class="btn" id="newGameBtn" title="New game">New Game</button>
+      <button class="btn" id="settingsBtn" title="Settings">⚙︎</button>
     </div>
   </header>
 
@@ -58,6 +62,31 @@
     </section>
   </main>
 
+  <div class="settings hidden" id="settings">
+    <div class="settings-card">
+      <div class="settings-head">
+        <div class="settings-title">Settings</div>
+        <button class="btn" id="closeSettingsBtn">Close</button>
+      </div>
+      
+      <div class="settings-block">
+        <div class="settings-label">Sound</div>
+        <label class="check"><input type="checkbox" id="soundMaster"> Enable sound</label>
+        <label class="check"><input type="checkbox" id="soundShuffle"> Shuffle</label>
+        <label class="check"><input type="checkbox" id="soundPlace"> Place</label>
+        <label class="check"><input type="checkbox" id="soundWin"> Win</label>
+      </div>
+
+      <div class="settings-block">
+        <div class="settings-label">Card Back</div>
+
+        <select id="backSelect" class="select"></select>
+        <div class="settings-help">Drop new PNGs into cards/backs to add more.</div>
+      </div>
+    </div>
+  </div>
+
+
   <!-- Win overlay -->
   <div class="overlay hidden" id="winOverlay" role="dialog" aria-modal="true">
     <canvas id="confettiCanvas"></canvas>
@@ -70,6 +99,7 @@
     </div>
   </div>
 
+  <script src="./cards/backs/backs.js"></script>
   <script src="./main.js"></script>
 </body>
 </html>
