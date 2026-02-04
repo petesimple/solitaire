@@ -16,9 +16,14 @@
 <body>
   <header class="topbar">
     <div class="brand">
-      <div class="title">Air Hockey Solitaire</div>
-      <div class="subtitle">Klondike - 1 draw - timed</div>
-    </div>
+  <button class="logo-btn" id="logoBtn" aria-label="Share Air Hockey Solitaire">
+    <img src="./icon-192.png" alt="Air Hockey Solitaire logo" />
+  </button>
+  <div class="brand-text">
+    <div class="title">Air Hockey Solitaire</div>
+    <div class="subtitle">Klondike - 1 draw - timed</div>
+  </div>
+</div>
 
     <div class="hud">
       <div class="moves" id="moves">Moves: 0</div>
@@ -114,5 +119,27 @@
       });
     }
   </script>
+  <!-- Share overlay -->
+<div class="overlay hidden" id="shareOverlay" role="dialog" aria-modal="true">
+  <div class="share-card">
+    <div class="share-title">Share Air Hockey Solitaire</div>
+
+    <img
+      src="./air-hockey-solitaire-qr.png"
+      alt="QR code for Air Hockey Solitaire"
+      class="share-qr"
+    />
+
+    <div class="share-url">
+      https://petesimple.github.io/solitaire/
+    </div>
+
+    <div class="share-actions">
+      <button class="btn" id="copyLinkBtn">Copy Link</button>
+      <button class="btn primary" id="nativeShareBtn">Share</button>
+      <button class="btn" id="closeShareBtn">Close</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
