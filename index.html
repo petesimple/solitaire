@@ -27,7 +27,7 @@
     <div class="pill">Moves: <span id="moves">0</span></div>
     <div class="pill"><span id="timer">00:00</span></div>
 
-    <button id="logoBtn" class="pill">Share</button>
+    <button id="shareBtn" class="pill">Share</button>
     <button id="undoBtn" class="pill">Undo</button>
     <button id="autoBtn" class="pill">Auto</button>
     <button id="newGameBtn" class="pill">New Game</button>
@@ -142,6 +142,79 @@
       });
     }
   </script>
+
+  <script>
+(() => {
+  const SHARE_URL = 'https://petesimple.github.io/solitaire/';
+
+  const logoBtn = document.getElementById('logoBtn');
+  const shareBtn = document.getElementById('shareBtn');
+
+  const shareOverlay = document.getElementById('shareOverlay');
+  const closeShareBtn = document.getElementById('closeShareBtn');
+  const copyLinkBtn = document.getElementById('copyLinkBtn');
+  const nativeShareBtn = document.getElementById('nativeShareBtn');
+
+  function openShare(){
+    if(!shareOverlay) return;
+    shareOverlay.classList.remove('hidden');
+  }
+  function closeShare(){
+    if(!shareOverlay) return;
+    shareOverlay.classList.add('hidden');
+  }
+
+  // Open from either logo tap OR Share button
+  if(logoBtn) logoBtn.addEventListener('click', openShare);
+  if(shareBtn) shareBtn.addEventListener('click', openShare);
+
+  if(closeShareBtn) closeShareBtn.addEventListener('click', closeShare);
+
+  // Tap outside card closes
+  if(shareOverlay){
+    shareOverlay.addEventListener('click', (e) => {
+      if(e.target === shareOverlay) closeShare();
+    });
+  }
+
+  // Copy link
+  if(copyLinkBtn){
+    copyLinkBtn.addEventListener('click', async () => {
+      try{
+        await navigator.clipboard.writeText(SHARE_URL);
+        const prev = copyLinkBtn.textContent;
+        copyLinkBtn.textContent = 'Copied!';
+        setTimeout(()=> copyLinkBtn.textContent = prev, 1200);
+      }catch(e){
+        // iOS can be picky - fallback prompt
+        window.prompt('Copy this link:', SHARE_URL);
+      }
+    });
+  }
+
+  // Native share (mobile)
+  if(nativeShareBtn){
+    if(navigator.share){
+      nativeShareBtn.addEventListener('click', async () => {
+        try{
+          await navigator.share({
+            title: 'Air Hockey Solitaire',
+            text: 'Play Air Hockey Solitaire',
+            url: SHARE_URL
+          });
+        }catch(e){}
+      });
+    } else {
+      nativeShareBtn.style.display = 'none';
+    }
+  }
+
+  // Esc closes
+  window.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape') closeShare();
+  });
+})();
+</script>
   
 </body>
 </html>
