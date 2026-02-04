@@ -12,7 +12,7 @@
 
   const ASSET = {
     frontsDir: './cards/fronts/',
-    back: './cards/backs/back-v1.png'
+    back: './cards/backs/brunswick.png'
   };
 
   // ---------- DOM ----------
