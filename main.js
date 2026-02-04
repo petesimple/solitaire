@@ -2,7 +2,7 @@
 (() => {
   'use strict';
 
-  window.AH_SOLITAIRE_BACKS = window.AH_SOLITAIRE_BACKS || ['back-v1.png'];
+  window.AH_SOLITAIRE_BACKS = window.AH_SOLITAIRE_BACKS || ['brunswick.png'];
 
   // ---------- Config ----------
   const SUITS = ['S','H','D','C'];
