@@ -103,9 +103,10 @@
     <canvas id="confettiCanvas"></canvas>
     <div class="win-card">
       <div class="win-title">You won</div>
-      <div class="win-sub">Nice hands, Pete.</div>
+      <div class="win-sub">Nice hands, fellow human.</div>
       <div class="win-actions">
         <button class="btn primary" id="playAgainBtn">Play Again</button>
+        <button class="btn" id="winShareBtn">Brag</button>
       </div>
     </div>
   </div>
@@ -213,8 +214,73 @@
   window.addEventListener('keydown', (e) => {
     if(e.key === 'Escape') closeShare();
   });
+  // Win share brag
+const winShareBtn = document.getElementById('winShareBtn');
+
+function getWinStats(){
+  const movesText = (document.getElementById('moves')?.textContent || '').trim();
+  const timerText = (document.getElementById('timer')?.textContent || '').trim();
+
+  // In your UI moves is just a number in #moves, timer is already formatted
+  const moves = movesText || '0';
+  const time = timerText || '00:00';
+
+  return { moves, time };
+}
+
+function buildBragText(){
+  const { moves, time } = getWinStats();
+
+  // Optional: date stamp like Wordle does
+  const d = new Date();
+  const stamp = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+  return [
+    `Air Hockey Solitaire`,
+    `Win on ${stamp}`,
+    `Time: ${time}`,
+    `Moves: ${moves}`,
+    ``,
+    `Play it: https://petesimple.github.io/solitaire/`
+  ].join('\n');
+}
+
+async function shareOrCopy(text){
+  // Prefer native share when available
+  if (navigator.share) {
+    try{
+      await navigator.share({
+        title: 'Air Hockey Solitaire',
+        text,
+        url: 'https://petesimple.github.io/solitaire/'
+      });
+      return;
+    }catch(e){}
+  }
+
+  // Clipboard fallback
+  try{
+    await navigator.clipboard.writeText(text);
+    // Tiny feedback: reuse win button label if you want
+    if(winShareBtn){
+      const prev = winShareBtn.textContent;
+      winShareBtn.textContent = 'Copied!';
+      setTimeout(()=> winShareBtn.textContent = prev, 1200);
+    }
+  }catch(e){
+    window.prompt('Copy this brag text:', text);
+  }
+}
+
+if(winShareBtn){
+  winShareBtn.addEventListener('click', () => {
+    const brag = buildBragText();
+    shareOrCopy(brag);
+  });
+}
 })();
 </script>
+  
   
 </body>
 </html>
