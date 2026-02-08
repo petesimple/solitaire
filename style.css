@@ -13,7 +13,7 @@
   --cardW: 92px;
   --cardH: 128px;
   --gap: 12px;
-  --stackOffset: 22px;
+  --stackOffset: 26px;
 }
 
 *{ box-sizing:border-box; }
