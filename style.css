@@ -368,12 +368,12 @@ body{
 }
 
 @media (max-width: 820px){
-  :root{ --cardW: 78px; --cardH: 108px; --stackOffset: 18px; }
+  :root{ --cardW: 78px; --cardH: 108px; --stackOffset: 22px; }
   .table{ overflow:auto; height: calc(100% - 60px); }
   body{ overflow:auto; }
 }
 @media (max-width: 520px){
-  :root{ --cardW: 64px; --cardH: 92px; --stackOffset: 16px; --gap: 10px; }
+  :root{ --cardW: 64px; --cardH: 92px; --stackOffset: 20px; --gap: 10px; }
   .brand .subtitle{ display:none; }
 }
 
