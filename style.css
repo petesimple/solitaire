@@ -444,3 +444,55 @@ body{
 .check input{
   transform: scale(1.15);
 }
+/* ---- Must-fix: prevent rightmost foundation cutoff on small phones ---- */
+
+/* Allow flex children to shrink instead of forcing overflow */
+.row,
+.pile-group,
+.pile-wrap{
+  min-width: 0;
+}
+
+/* Make sure the top row doesn't push content offscreen */
+.row.top{
+  flex-wrap: nowrap;
+}
+
+/* On narrow screens, lay foundations out as a tight 4-col grid */
+@media (max-width: 520px){
+  .row.top{
+    align-items: flex-start;
+  }
+
+  /* Left side (stock/waste) stays flex, right side becomes grid */
+  .pile-group.right{
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;              /* tighter than var(--gap) */
+    justify-items: center; /* centers piles in their cells */
+  }
+
+  /* Keep pile widths from forcing overflow */
+  .pile-group.right .pile{
+    width: var(--cardW);
+    max-width: 100%;
+  }
+
+  /* Slightly tighten overall spacing for this breakpoint */
+  :root{
+    --gap: 8px;
+  }
+}
+
+/* Extra tiny phones */
+@media (max-width: 360px){
+  :root{
+    --cardW: 58px;
+    --cardH: 84px;
+    --gap: 6px;
+  }
+
+  .pile-group.right{
+    gap: 4px;
+  }
+}
