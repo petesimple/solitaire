@@ -7,4 +7,5 @@ window.AH_SOLITAIRE_BACKS = [
   "dynamopurple.png",
   "GSGice.png",
   "GSG.png",
+  "replaygames.png",
 ];
